@@ -68,17 +68,23 @@ class mainWebCrawler:
             self.COURT_NAMES.append(court_name_xpath[i].get_attribute('innerText'))
 
     def set_court(self, court_name):
-        # for i in range(len(self.COURT_NAMES)):
-        #     print(f"{i + 1}. {self.COURT_NAMES[i]}")
         self.COURT_NAME = court_name
         self.driver.find_element(by=By.XPATH, value="""//input[@name='selectedCourtName']""").send_keys(f"""{self.COURT_NAME}""")
         self.driver.find_element(by=By.XPATH, value="""//input[@name='selectedCourtName']""").send_keys(Keys.TAB)
 
     def set_date(self, search_date):
-        self.driver.find_element(by=By.XPATH, value="//div[@class='trafficcriminaltab']//a[text()='Hearing Date Search']").click()
         self.SEARCH_DATE = search_date
-        self.driver.find_element(by=By.XPATH, value="""//input[@class='hasDatepicker']""").send_keys(self.SEARCH_DATE)
-        self.driver.find_element(by=By.XPATH, value="""//input[@class='hasDatepicker']""").send_keys(Keys.ENTER)
+        try:
+            self.driver.find_element(by=By.XPATH, value="//div[@class='trafficcriminaltab']//a[text()='Hearing Date Search']").click()
+            self.driver.find_element(by=By.XPATH, value="""//input[@class='hasDatepicker']""").send_keys(self.SEARCH_DATE)
+            self.driver.find_element(by=By.XPATH, value="""//input[@class='hasDatepicker']""").send_keys(Keys.ENTER)
+        except:
+            self.driver.find_element(by=By.XPATH, value="""//input[@name='selectedCourtName']""").send_keys(f"""{self.COURT_NAME}""")
+            self.driver.find_element(by=By.XPATH, value="""//input[@name='selectedCourtName']""").send_keys(Keys.TAB)
+            time.sleep(2)
+            self.driver.find_element(by=By.XPATH, value="//div[@class='trafficcriminaltab']//a[text()='Hearing Date Search']").click()
+            self.driver.find_element(by=By.XPATH, value="""//input[@class='hasDatepicker']""").send_keys(self.SEARCH_DATE)
+            self.driver.find_element(by=By.XPATH, value="""//input[@class='hasDatepicker']""").send_keys(Keys.ENTER)
 
     def get_page_data(self):
         do_run = True
@@ -169,7 +175,7 @@ class mainWebCrawler:
 
 
 _from = '2021/01/01'
-_to = '2021/01/02' # format: YYYY/MM/DD
+_to = '2021/01/02'
 
 s_split = _from.split("/")
 e_split = _to.split("/")
@@ -184,10 +190,11 @@ while date_modified < e_date:
 crawler = mainWebCrawler()
 crawler.get_court_names()
 for _name in tqdm(crawler.COURT_NAMES):
-    crawler.set_court(_name)
-    for _date in tqdm(_list):
-        _split = str(_date).split('-')
-        crawler.set_date(str(_split[1] + "/" + _split[2] + "/" + _split[0]))
-        crawler.get_page_data()
-        crawler.scrape_pages()
-        crawler.save_to_csv()
+    if _name:
+        crawler.set_court(_name)
+        for _date in tqdm(_list):
+            _split = str(_date).split('-')
+            crawler.set_date(str(_split[1] + "/" + _split[2] + "/" + _split[0]))
+            crawler.get_page_data()
+            crawler.scrape_pages()
+            crawler.save_to_csv()
