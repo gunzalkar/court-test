@@ -174,8 +174,8 @@ class mainWebCrawler:
         self.table.to_csv(f"{self.COURT_NAME} {custom_date}.csv", index=False)
 
 
-_from = '2021/01/04' #YYYY/MM/DD
-_to = '2021/01/31'
+_from = '2021/02/01' #YYYY/MM/DD
+_to = '2021/02/28'
 
 s_split = _from.split("/")
 e_split = _to.split("/")
